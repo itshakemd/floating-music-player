@@ -38,6 +38,11 @@ function updateTrayMenu() {
 }
 function createWindow() {
   win = new BrowserWindow({
+    width: 400,
+    height: 600,
+    resizable: false,
+    frame: false,
+    movable: true,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname$1, "preload.mjs")

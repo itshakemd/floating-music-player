@@ -14,6 +14,7 @@
 }
 
 a {
+  -webkit-app-region: no-drag;
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
@@ -28,6 +29,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  -webkit-app-region: drag;
 }
 
 h1 {
@@ -36,6 +38,7 @@ h1 {
 }
 
 button {
+  -webkit-app-region: no-drag;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
