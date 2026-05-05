@@ -38,8 +38,8 @@ function updateTrayMenu() {
 }
 function createWindow() {
   win = new BrowserWindow({
-    width: 400,
-    height: 600,
+    width: 150,
+    height: 150,
     resizable: false,
     frame: false,
     movable: true,
