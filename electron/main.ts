@@ -134,10 +134,24 @@ ipcMain.on('audio-status-changed', (_, isActive: boolean) => {
 // Global Media Control IPC
 ipcMain.on('media-play-pause', () => {
   if (process.platform === 'win32') {
-    // Windows: Use PowerShell to simulate the Media Play/Pause key (code 179)
-    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"', (error) => {
-      if (error) console.error('Failed to execute media command:', error)
-    })
+     // Windows: Use PowerShell to simulate the Media Play/Pause key (code 179)
+     exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"', (error) => {
+       if (error) console.error('Failed to execute media command:', error)
+     })
+   }
+})
+
+ipcMain.on('volume-up', () => {
+  if (process.platform === 'win32') {
+    // Volume Up (code 175)
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]175)"')
+  }
+})
+
+ipcMain.on('volume-down', () => {
+  if (process.platform === 'win32') {
+    // Volume Down (code 174)
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]174)"')
   }
 })
 
@@ -146,11 +160,11 @@ ipcMain.on('toggle-window-size', () => {
   const [width, height] = win.getSize()
   
   // Toggle logic with more robust height check
-  if (height < 100) {
-    // Expand to square
+  if (height < 96) {
+    // Expand to double height (48 * 2 = 96)
     win.setResizable(true)
-    win.setMinimumSize(120, 120)
-    win.setSize(120, 120)
+    win.setMinimumSize(120, 96)
+    win.setSize(120, 96)
     win.setResizable(false)
   } else {
     // Collapse to bar

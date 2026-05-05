@@ -94,9 +94,31 @@ function App() {
     window.ipcRenderer.send('toggle-window-size')
   }
 
+  const handleVolumeUp = () => {
+    window.ipcRenderer.send('volume-up')
+  }
+
+  const handleVolumeDown = () => {
+    window.ipcRenderer.send('volume-down')
+  }
+
   return (
     <div className="container">
       {/* Audio detection running in background */}
+      {isExpanded && (
+        <div className="top-bar">
+          <button className="control-btn" onClick={handleVolumeDown}>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"></path>
+            </svg>
+          </button>
+          <button className="control-btn" onClick={handleVolumeUp}>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="bottom-bar">
         <button className="control-btn" onClick={handlePlayPause}>
           {isPlaying ? (

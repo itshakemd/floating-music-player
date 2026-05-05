@@ -105,13 +105,23 @@ ipcMain.on("media-play-pause", () => {
     });
   }
 });
+ipcMain.on("volume-up", () => {
+  if (process.platform === "win32") {
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]175)"');
+  }
+});
+ipcMain.on("volume-down", () => {
+  if (process.platform === "win32") {
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]174)"');
+  }
+});
 ipcMain.on("toggle-window-size", () => {
   if (!win) return;
   const [width, height] = win.getSize();
-  if (height < 100) {
+  if (height < 96) {
     win.setResizable(true);
-    win.setMinimumSize(120, 120);
-    win.setSize(120, 120);
+    win.setMinimumSize(120, 96);
+    win.setSize(120, 96);
     win.setResizable(false);
   } else {
     win.setResizable(true);

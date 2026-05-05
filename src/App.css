@@ -60,9 +60,8 @@
   opacity: 0.8;
 }
 
-.bottom-bar {
+.top-bar, .bottom-bar {
   position: absolute;
-  bottom: 0;
   left: 0;
   right: 0;
   height: 48px;
@@ -73,6 +72,15 @@
   align-items: center;
   gap: 12px;
   -webkit-app-region: drag;
+}
+
+.top-bar {
+  top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bottom-bar {
+  bottom: 0;
 }
 
 .control-btn {
