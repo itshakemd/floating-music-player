@@ -11,6 +11,31 @@ const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
 let tray;
+let isQuitting = false;
+function updateTrayMenu() {
+  if (!tray) return;
+  const contextMenu = Menu.buildFromTemplate([
+    { label: "Floating Music Player", enabled: false },
+    { type: "separator" },
+    {
+      label: (win == null ? void 0 : win.isVisible()) ? "Hide Window" : "Show Window",
+      click: () => {
+        if (win == null ? void 0 : win.isVisible()) {
+          win.hide();
+        } else {
+          win == null ? void 0 : win.show();
+          win == null ? void 0 : win.focus();
+        }
+      }
+    },
+    { type: "separator" },
+    { label: "Quit", click: () => {
+      isQuitting = true;
+      app.quit();
+    } }
+  ]);
+  tray.setContextMenu(contextMenu);
+}
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
@@ -20,6 +45,18 @@ function createWindow() {
   });
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  win.on("close", (event) => {
+    if (win && !isQuitting) {
+      event.preventDefault();
+      win.hide();
+    }
+  });
+  win.on("show", () => {
+    updateTrayMenu();
+  });
+  win.on("hide", () => {
+    updateTrayMenu();
   });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
@@ -31,20 +68,14 @@ function createTray() {
   const iconPath = path.join(process.env.VITE_PUBLIC, "electron-vite.svg");
   const icon = nativeImage.createFromPath(iconPath);
   tray = new Tray(icon);
-  const contextMenu = Menu.buildFromTemplate([
-    { label: "Floating Music Player", enabled: false },
-    { type: "separator" },
-    { label: "Quit", click: () => app.quit() }
-  ]);
   tray.setToolTip("Floating Music Player");
-  tray.setContextMenu(contextMenu);
+  updateTrayMenu();
   tray.on("click", () => {
-    if (win) {
-      if (win.isVisible()) {
-        win.focus();
-      } else {
-        win.show();
-      }
+    if (win == null ? void 0 : win.isVisible()) {
+      win.hide();
+    } else {
+      win == null ? void 0 : win.show();
+      win == null ? void 0 : win.focus();
     }
   });
 }

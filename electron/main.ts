@@ -26,6 +26,32 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 
 let win: BrowserWindow | null
 let tray: Tray | null
+let isQuitting = false
+
+function updateTrayMenu() {
+  if (!tray) return
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Floating Music Player', enabled: false },
+    { type: 'separator' },
+    { 
+      label: win?.isVisible() ? 'Hide Window' : 'Show Window', 
+      click: () => {
+        if (win?.isVisible()) {
+          win.hide()
+        } else {
+          win?.show()
+          win?.focus()
+        }
+      } 
+    },
+    { type: 'separator' },
+    { label: 'Quit', click: () => {
+      isQuitting = true
+      app.quit()
+    }}
+  ])
+  tray.setContextMenu(contextMenu)
+}
 
 function createWindow() {
   win = new BrowserWindow({
@@ -38,6 +64,22 @@ function createWindow() {
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
+  })
+
+  // Hide window instead of closing it
+  win.on('close', (event) => {
+    if (win && !isQuitting) {
+      event.preventDefault()
+      win.hide()
+    }
+  })
+
+  win.on('show', () => {
+    updateTrayMenu()
+  })
+
+  win.on('hide', () => {
+    updateTrayMenu()
   })
 
   if (VITE_DEV_SERVER_URL) {
@@ -54,22 +96,15 @@ function createTray() {
   
   tray = new Tray(icon)
   
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'Floating Music Player', enabled: false },
-    { type: 'separator' },
-    { label: 'Quit', click: () => app.quit() }
-  ])
-  
   tray.setToolTip('Floating Music Player')
-  tray.setContextMenu(contextMenu)
+  updateTrayMenu()
 
   tray.on('click', () => {
-    if (win) {
-      if (win.isVisible()) {
-        win.focus()
-      } else {
-        win.show()
-      }
+    if (win?.isVisible()) {
+      win.hide()
+    } else {
+      win?.show()
+      win?.focus()
     }
   })
 }
