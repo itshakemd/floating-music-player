@@ -2,7 +2,7 @@ import { ipcMain, desktopCapturer, app, BrowserWindow, nativeImage, Tray, Menu }
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-createRequire(import.meta.url);
+const require$1 = createRequire(import.meta.url);
 const __dirname$1 = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname$1, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -95,6 +95,12 @@ ipcMain.handle("get-desktop-sources", async () => {
 ipcMain.on("audio-status-changed", (_, isActive) => {
   if (tray) {
     tray.setToolTip(`Floating Music Player - ${isActive ? "Music Playing" : "Idle"}`);
+  }
+});
+ipcMain.on("media-play-pause", () => {
+  const { exec } = require$1("child_process");
+  if (process.platform === "win32") {
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"');
   }
 });
 app.on("window-all-closed", () => {
