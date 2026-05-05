@@ -2,6 +2,7 @@ import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, desktopCapturer, 
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { exec } from 'node:child_process'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -132,21 +133,31 @@ ipcMain.on('audio-status-changed', (_, isActive: boolean) => {
 
 // Global Media Control IPC
 ipcMain.on('media-play-pause', () => {
-  // Use the built-in system-level media control via keyboard simulation if possible
-  // or use robotjs if installed. Since we are in a pure Electron environment,
-  // we can use globalShortcut to trigger media keys, but triggering them 
-  // programmatically often requires a native module.
-  
-  // A common trick in Electron is to use a hidden window to trigger media keys,
-  // but the most reliable way without external dependencies is to use the 
-  // MediaSession API in the renderer if the app was playing audio.
-  
-  // For system-wide control, we'll implement a cross-platform solution 
-  // that simulates the 'MediaPlayPause' key.
-  const { exec } = require('child_process')
   if (process.platform === 'win32') {
     // Windows: Use PowerShell to simulate the Media Play/Pause key (code 179)
-    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"')
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"', (error) => {
+      if (error) console.error('Failed to execute media command:', error)
+    })
+  }
+})
+
+ipcMain.on('toggle-window-size', () => {
+  if (!win) return
+  const [width, height] = win.getSize()
+  
+  // Toggle logic with more robust height check
+  if (height < 100) {
+    // Expand to square
+    win.setResizable(true)
+    win.setMinimumSize(120, 120)
+    win.setSize(120, 120)
+    win.setResizable(false)
+  } else {
+    // Collapse to bar
+    win.setResizable(true)
+    win.setMinimumSize(120, 48)
+    win.setSize(120, 48)
+    win.setResizable(false)
   }
 })
 

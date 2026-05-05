@@ -2,7 +2,8 @@ import { ipcMain, desktopCapturer, app, BrowserWindow, nativeImage, Tray, Menu }
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-const require$1 = createRequire(import.meta.url);
+import { exec } from "node:child_process";
+createRequire(import.meta.url);
 const __dirname$1 = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname$1, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -98,9 +99,25 @@ ipcMain.on("audio-status-changed", (_, isActive) => {
   }
 });
 ipcMain.on("media-play-pause", () => {
-  const { exec } = require$1("child_process");
   if (process.platform === "win32") {
-    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"');
+    exec('powershell -Command "(New-Object -ComObject WScript.Shell).SendKeys([char]179)"', (error) => {
+      if (error) console.error("Failed to execute media command:", error);
+    });
+  }
+});
+ipcMain.on("toggle-window-size", () => {
+  if (!win) return;
+  const [width, height] = win.getSize();
+  if (height < 100) {
+    win.setResizable(true);
+    win.setMinimumSize(120, 120);
+    win.setSize(120, 120);
+    win.setResizable(false);
+  } else {
+    win.setResizable(true);
+    win.setMinimumSize(120, 48);
+    win.setSize(120, 48);
+    win.setResizable(false);
   }
 });
 app.on("window-all-closed", () => {

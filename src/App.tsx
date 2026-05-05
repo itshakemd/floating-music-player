@@ -4,6 +4,7 @@ import './App.css'
 function App() {
   const [isAudioActive, setIsAudioActive] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [audioLevel, setAudioLevel] = useState(0)
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -89,7 +90,8 @@ function App() {
   }
 
   const handleMaximize = () => {
-    // Optional: add maximize logic later
+    setIsExpanded(!isExpanded)
+    window.ipcRenderer.send('toggle-window-size')
   }
 
   return (
@@ -108,9 +110,15 @@ function App() {
           )}
         </button>
         <button className="control-btn" onClick={handleMaximize}>
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-            <path d="M21 3h-6l2.29 2.29-4.88 4.88 1.42 1.42 4.88-4.88L21 9V3zM3 21h6l-2.29-2.29 4.88-4.88-1.42-1.42-4.88 4.88L3 15v6z"></path>
-          </svg>
+          {isExpanded ? (
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M21 3h-6l2.29 2.29-4.88 4.88 1.42 1.42 4.88-4.88L21 9V3zM3 21h6l-2.29-2.29 4.88-4.88-1.42-1.42-4.88 4.88L3 15v6z"></path>
+            </svg>
+          )}
         </button>
       </div>
     </div>
