@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage, Tray, Menu } from "electron";
+import { ipcMain, desktopCapturer, app, BrowserWindow, nativeImage, Tray, Menu } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -43,6 +43,7 @@ function createWindow() {
     resizable: false,
     frame: false,
     movable: true,
+    alwaysOnTop: true,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname$1, "preload.mjs")
@@ -84,6 +85,18 @@ function createTray() {
     }
   });
 }
+ipcMain.handle("get-desktop-sources", async () => {
+  const sources = await desktopCapturer.getSources({ types: ["screen", "window"] });
+  return sources.map((source) => ({
+    id: source.id,
+    name: source.name
+  }));
+});
+ipcMain.on("audio-status-changed", (_, isActive) => {
+  if (tray) {
+    tray.setToolTip(`Floating Music Player - ${isActive ? "Music Playing" : "Idle"}`);
+  }
+});
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();

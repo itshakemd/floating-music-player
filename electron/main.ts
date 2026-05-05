@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
+import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, desktopCapturer } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -60,6 +60,7 @@ function createWindow() {
     resizable: false,
     frame: false,
     movable: true,
+    alwaysOnTop: true,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
@@ -113,6 +114,21 @@ function createTray() {
     }
   })
 }
+
+// IPC handler for system audio source
+ipcMain.handle('get-desktop-sources', async () => {
+  const sources = await desktopCapturer.getSources({ types: ['screen', 'window'] })
+  return sources.map(source => ({
+    id: source.id,
+    name: source.name,
+  }))
+})
+
+ipcMain.on('audio-status-changed', (_, isActive: boolean) => {
+  if (tray) {
+    tray.setToolTip(`Floating Music Player - ${isActive ? 'Music Playing' : 'Idle'}`)
+  }
+})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
